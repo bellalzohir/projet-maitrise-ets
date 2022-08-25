@@ -1,0 +1,13 @@
+# Conprehension test params
+prewarm=true
+containerFactory=kubernetes
+cold_loop=1
+warm_loop=0
+warm_warmup=0
+concurrent_client=0
+concurrent_loop=0
+concurrent_warmup=0
+
+# Single test params 
+PARAMS="-p n 20"
+ACTIONNAME=arraySumNested

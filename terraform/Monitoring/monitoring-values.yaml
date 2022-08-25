@@ -1,0 +1,642 @@
+# from : https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
+
+namespaceOverride: ""
+commonLabels: {}
+
+## Create default rules for monitoring the cluster
+##
+defaultRules:
+  create: true
+  rules:
+    alertmanager: true
+    etcd: true
+    configReloaders: true
+    general: true
+    k8s: true
+    kubeApiserver: true
+    kubeApiserverAvailability: true
+    kubeApiserverSlos: true
+    kubelet: true
+    kubeProxy: true
+    kubePrometheusGeneral: true
+    kubePrometheusNodeRecording: true
+    kubernetesApps: true
+    kubernetesResources: true
+    kubernetesStorage: true
+    kubernetesSystem: true
+    kubeScheduler: true
+    kubeStateMetrics: true
+    network: true
+    node: true
+    nodeExporterAlerting: true
+    nodeExporterRecording: true
+    prometheus: true
+    prometheusOperator: true
+  ## Labels for default rules
+  labels: {}
+  ## Annotations for default rules
+  annotations: {}
+  ## Additional labels for PrometheusRule alerts
+  additionalRuleLabels: {}
+  ## Prefix for runbook URLs. Use this to override the first part of the runbookURLs that is common to all rules.
+  runbookUrl: "https://runbooks.prometheus-operator.dev/runbooks"
+  ## Disabled PrometheusRule alerts
+  disabled: {}
+
+## Provide custom recording or alerting rules to be deployed into the cluster.
+##
+additionalPrometheusRulesMap: {}
+
+##
+global:
+  rbac:
+    create: true
+
+alertmanager:
+  enabled: true
+  annotations: {}
+  apiVersion: v2
+  serviceAccount:
+    create: true
+    name: ""
+    annotations: {}
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+    maxUnavailable: ""
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      group_by: ['job']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 12h
+      receiver: 'null'
+      routes:
+      - match:
+          alertname: Watchdog
+        receiver: 'null'
+    receivers:
+    - name: 'null'
+    templates:
+    - '/etc/alertmanager/config/*.tmpl'
+  tplConfig: false
+  templateFiles: {}
+  #
+  ## An example template:
+  #   template_1.tmpl: |-
+  #       {{ define "cluster" }}{{ .ExternalURL | reReplaceAll ".*alertmanager\\.(.*)" "$1" }}{{ end }}
+  #
+  #       {{ define "slack.myorg.text" }}
+  #       {{- $root := . -}}
+  #       {{ range .Alerts }}
+  #         *Alert:* {{ .Annotations.summary }} - `{{ .Labels.severity }}`
+  #         *Cluster:* {{ template "cluster" $root }}
+  #         *Description:* {{ .Annotations.description }}
+  #         *Graph:* <{{ .GeneratorURL }}|:chart_with_upwards_trend:>
+  #         *Runbook:* <{{ .Annotations.runbook }}|:spiral_note_pad:>
+  #         *Details:*
+  #           {{ range .Labels.SortedPairs }} - *{{ .Name }}:* `{{ .Value }}`
+  #           {{ end }}
+  #       {{ end }}
+  #       {{ end }}
+  ingress:
+    enabled: false
+  secret:
+    annotations: {}
+  ingressPerReplica:
+    enabled: false
+
+  service:
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+    port: 9093
+    targetPort: 9093
+    nodePort: 30903
+    additionalPorts: []
+    externalIPs: []
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
+    externalTrafficPolicy: Cluster
+    type: NodePort
+
+  servicePerReplica:
+    enabled: false
+
+  serviceMonitor:
+    selfMonitor: true
+
+  alertmanagerSpec:
+    podMetadata: {}
+    image:
+      repository: quay.io/prometheus/alertmanager
+      tag: v0.24.0
+      sha: ""
+    useExistingSecret: false
+    secrets: []
+    configMaps: []
+    alertmanagerConfiguration: {}
+    logFormat: logfmt
+    logLevel: info
+    replicas: 1
+    retention: 120h
+    storage: {}
+    # volumeClaimTemplate:
+    #   spec:
+    #     storageClassName: gluster
+    #     accessModes: ["ReadWriteOnce"]
+    #     resources:
+    #       requests:
+    #         storage: 50Gi
+    #   selector: {}
+    externalUrl:
+    routePrefix: /
+    nodeSelector: {}
+    resources: {}
+    # requests:
+    #   memory: 400Mi
+    podAntiAffinity: ""
+    podAntiAffinityTopologyKey: kubernetes.io/hostname
+    affinity: {}
+    tolerations: []
+    containers: []
+    volumes: []
+    volumeMounts: []
+    initContainers: []
+    portName: "http-web"
+
+## Using default values from https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
+grafana:
+  enabled: true
+  namespaceOverride: ""
+  defaultDashboardsEnabled: true
+  defaultDashboardsTimezone: browser
+
+  adminPassword: admin
+
+  ingress:
+    enabled: false
+
+  dashboards: {}
+  # default:
+  #   some-dashboard:
+  #     json: |
+  #       $RAW_JSON
+  #   custom-dashboard:
+  #     file: dashboards/custom-dashboard.json
+  #   prometheus-stats:
+  #     gnetId: 2
+  #     revision: 2
+  #     datasource: Prometheus
+  #   local-dashboard:
+  #     url: https://example.com/repository/test.json
+  #     token: ''
+  #   local-dashboard-base64:
+  #     url: https://example.com/repository/test-b64.json
+  #     token: ''
+  #     b64content: true
+
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      annotations: {}
+      multicluster:
+        global:
+          enabled: false
+        etcd:
+          enabled: false
+      provider:
+        allowUiUpdates: false
+    datasources:
+      enabled: true
+      defaultDatasourceEnabled: true
+      uid: prometheus
+      ## URL of prometheus datasource
+      ##
+      # url: http://prometheus-stack-prometheus:9090/
+
+      # If not defined, will use prometheus.prometheusSpec.scrapeInterval or its default
+      # defaultDatasourceScrapeInterval: 15s
+      annotations: {}
+  extraConfigmapMounts: []
+  deleteDatasources: []
+
+  ## Configure additional grafana datasources (passed through tpl)
+  ## ref: http://docs.grafana.org/administration/provisioning/#datasources
+  additionalDataSources: 
+  #- name: Prometheus-OW
+  #  type: prometheus
+  #  access: proxy
+  #  isDefault: false
+  #  url: http://owdev-prometheus-server.openwhisk.svc.cluster.local:9090
+  # - name: prometheus-sample
+  #   access: proxy
+  #   basicAuth: true
+  #   basicAuthPassword: pass
+  #   basicAuthUser: daco
+  #   editable: false
+  #   jsonData:
+  #       tlsSkipVerify: true
+  #   orgId: 1
+  #   type: prometheus
+  #   url: https://{{ printf "%s-prometheus.svc" .Release.Name }}:9090
+  #   version: 1
+
+  service:
+    portName: http-web
+    type: NodePort
+    nodePort: 31000
+
+  serviceMonitor:
+    enabled: true
+    path: "/metrics"
+    labels: {}
+    interval: ""
+    scheme: http
+    tlsConfig: {}
+    scrapeTimeout: 30s
+    relabelings: []
+
+kubeApiServer:
+  enabled: true
+  tlsConfig:
+    serverName: kubernetes
+    insecureSkipVerify: false
+  serviceMonitor:
+    interval: ""
+    proxyUrl: ""
+    jobLabel: component
+    selector:
+      matchLabels:
+        component: apiserver
+        provider: kubernetes
+    metricRelabelings: []
+    relabelings: []
+
+kubelet:
+  enabled: true
+  namespace: kube-system
+
+  serviceMonitor:
+    interval: ""
+    proxyUrl: ""
+    https: true
+    cAdvisor: true
+    probes: true
+
+    ## Enable scraping /metrics/resource from kubelet's service
+    ## This is disabled by default because container metrics are already exposed by cAdvisor
+    ##
+    resource: false
+    # From kubernetes 1.18, /metrics/resource/v1alpha1 renamed to /metrics/resource
+    resourcePath: "/metrics/resource/v1alpha1"
+
+    cAdvisorMetricRelabelings: []
+    probesMetricRelabelings: []
+    cAdvisorRelabelings:
+      - sourceLabels: [__metrics_path__]
+        targetLabel: metrics_path
+    probesRelabelings:
+      - sourceLabels: [__metrics_path__]
+        targetLabel: metrics_path
+    resourceRelabelings:
+      - sourceLabels: [__metrics_path__]
+        targetLabel: metrics_path
+    metricRelabelings: []
+    relabelings:
+      - sourceLabels: [__metrics_path__]
+        targetLabel: metrics_path
+
+kubeControllerManager:
+  enabled: true
+  service:
+    enabled: true
+
+  serviceMonitor:
+    enabled: true
+    interval: ""
+    proxyUrl: ""
+    https: null
+    insecureSkipVerify: true
+    serverName: null
+    metricRelabelings: []
+    relabelings: []
+
+coreDns:
+  enabled: true
+  service:
+    port: 9153
+    targetPort: 9153
+  serviceMonitor:
+    interval: ""
+    proxyUrl: ""
+    metricRelabelings: []
+    relabelings: []
+
+kubeDns:
+  enabled: false
+
+kubeEtcd:
+  enabled: true
+  service:
+    enabled: true
+    port: 2379
+    targetPort: 2379
+
+  serviceMonitor:
+    enabled: true
+    interval: ""
+    proxyUrl: ""
+    scheme: http
+    insecureSkipVerify: false
+    serverName: ""
+    caFile: ""
+    certFile: ""
+    keyFile: ""
+    metricRelabelings: []
+    relabelings: []
+
+kubeScheduler:
+  enabled: true
+  service:
+    enabled: true
+
+  serviceMonitor:
+    enabled: true
+    interval: ""
+    proxyUrl: ""
+    https: null
+    insecureSkipVerify: true
+    serverName: null
+    metricRelabelings: []
+    relabelings: []
+
+kubeProxy:
+  enabled: true
+  service:
+    enabled: true
+    port: 10249
+    targetPort: 10249
+
+  serviceMonitor:
+    enabled: true
+    interval: ""
+    proxyUrl: ""
+    https: false
+    metricRelabelings: []
+    relabelings: []
+
+kubeStateMetrics:
+  enabled: true
+
+kube-state-metrics:
+  namespaceOverride: ""
+  rbac:
+    create: true
+  releaseLabel: true
+  prometheus:
+    monitor:
+      enabled: true
+      interval: ""
+      scrapeTimeout: ""
+      proxyUrl: ""
+      honorLabels: true
+      metricRelabelings: []
+      relabelings: []
+  selfMonitor:
+    enabled: false
+
+nodeExporter:
+  enabled: true
+
+prometheus-node-exporter:
+  namespaceOverride: ""
+  podLabels:
+    jobLabel: node-exporter
+  extraArgs:
+    - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|var/lib/docker/.+|var/lib/kubelet/.+)($|/)
+    - --collector.filesystem.fs-types-exclude=^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$
+  service:
+    portName: http-metrics
+  prometheus:
+    monitor:
+      enabled: true
+      jobLabel: jobLabel
+      interval: ""
+      scrapeTimeout: ""
+      proxyUrl: ""
+      metricRelabelings: []
+      relabelings: []
+
+prometheusOperator:
+  enabled: true
+  tls:
+    enabled: true
+    tlsMinVersion: VersionTLS13
+    internalPort: 10250
+  admissionWebhooks:
+    failurePolicy: Fail
+    enabled: true
+    caBundle: ""
+  ## Namespaces to scope the interaction of the Prometheus Operator and the apiserver (allow list).
+  ## This is mutually exclusive with denyNamespaces. Setting this to an empty object will disable the configuration
+  ##
+  namespaces: {}
+    # releaseNamespace: true
+    # additional:
+    # - kube-system
+
+  denyNamespaces: []
+
+  alertmanagerInstanceNamespaces: []
+  prometheusInstanceNamespaces: []
+  thanosRulerInstanceNamespaces: []
+
+  serviceAccount:
+    create: true
+    name: ""
+  service:
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+    nodePort: 30080
+    nodePortTls: 30443
+    additionalPorts: []
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
+    externalTrafficPolicy: Cluster
+    type: ClusterIP
+    externalIPs: []
+  podLabels: {}
+  podAnnotations: {}
+  kubeletService:
+    enabled: true
+    namespace: kube-system
+    name: ""
+
+  serviceMonitor:
+    interval: ""
+    scrapeTimeout: ""
+    selfMonitor: true
+    metricRelabelings: []
+    relabelings: []
+
+  resources: {}
+  # limits:
+  #   cpu: 200m
+  #   memory: 200Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 100Mi
+  hostNetwork: false
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+  image:
+    repository: quay.io/prometheus-operator/prometheus-operator
+    tag: v0.56.0
+    sha: ""
+    pullPolicy: IfNotPresent
+
+  prometheusConfigReloader:
+    image:
+      repository: quay.io/prometheus-operator/prometheus-config-reloader
+      tag: v0.56.0
+      sha: ""
+    resources:
+      requests:
+        cpu: 200m
+        memory: 50Mi
+      limits:
+        cpu: 200m
+        memory: 50Mi
+
+prometheus:
+  enabled: true
+  annotations: {}
+  serviceAccount:
+    create: true
+    name: ""
+    annotations: {}
+  thanosService:
+    enabled: false
+  thanosServiceMonitor:
+    enabled: false
+  thanosServiceExternal:
+    enabled: false
+  service:
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+    port: 9090
+    targetPort: 9090
+    externalIPs: []
+    nodePort: 30090
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
+    externalTrafficPolicy: Cluster
+    type: NodePort
+    additionalPorts: []
+    publishNotReadyAddresses: false
+    sessionAffinity: ""
+  servicePerReplica:
+    enabled: false
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+    maxUnavailable: ""
+  thanosIngress:
+    enabled: false
+  ingress:
+    enabled: false
+  ingressPerReplica:
+    enabled: false
+  serviceMonitor:
+    interval: ""
+    selfMonitor: true
+    scheme: ""
+    metricRelabelings: []
+    relabelings: []
+  prometheusSpec:
+    disableCompaction: false
+    apiserverConfig: {}
+    ## Defaults to 30s.
+    scrapeInterval: "1s"
+    scrapeTimeout: "800ms"
+    evaluationInterval: "1s"
+    listenLocal: false
+    enableAdminAPI: false
+    image:
+      repository: quay.io/prometheus/prometheus
+      tag: v2.35.0
+      sha: ""
+    tolerations: []
+    externalUrl: ""
+    nodeSelector: {}
+    ## How long to retain metrics
+    ##
+    retention: 20d
+    retentionSize: ""
+    replicas: 1
+    logLevel: info
+    logFormat: logfmt
+    routePrefix: /
+    podMetadata: {}
+    podAntiAffinity: ""
+    podAntiAffinityTopologyKey: kubernetes.io/hostname
+    affinity: {}
+    resources: {}
+    # requests:
+    #   memory: 400Mi
+    storageSpec: {}
+    ## Using PersistentVolumeClaim
+    ##
+    #  volumeClaimTemplate:
+    #    spec:
+    #      storageClassName: gluster
+    #      accessModes: ["ReadWriteOnce"]
+    #      resources:
+    #        requests:
+    #          storage: 50Gi
+    #    selector: {}
+    volumes: []
+    volumeMounts: []
+    additionalScrapeConfigs: []
+      #- job_name: 'kubernetes-pods'
+      #  kubernetes_sd_configs:
+      #    - role: pod
+      #  relabel_configs:
+      #    - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+      #      action: keep
+      #      regex: true
+      #    - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+      #      action: replace
+      #      target_label: __metrics_path__
+      #      regex: (.+)
+      #    - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+      #      action: replace
+      #      regex: ([^:]+)(?::\d+)?;(\d+)
+      #      replacement: $1:$2
+      #      target_label: __address__
+      #    - action: labelmap
+      #      regex: __meta_kubernetes_pod_label_(.+)
+      #    - source_labels: [__meta_kubernetes_namespace]
+      #     action: replace
+      #      target_label: kubernetes_namespace
+      #    - source_labels: [__meta_kubernetes_pod_name]
+      #      action: replace
+      #      target_label: kubernetes_pod_name
+      #- job_name: Telegraf
+      #  # If telegraf is installed, grab stats about the local
+      #  # machine by default.
+      #  static_configs:
+      #    - targets: ['telegraf:9273'] 
+    portName: "http-web"
+  additionalRulesForClusterRole: []
+  additionalServiceMonitors: []
+  additionalPodMonitors: []

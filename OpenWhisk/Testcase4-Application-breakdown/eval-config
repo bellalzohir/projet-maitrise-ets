@@ -1,0 +1,9 @@
+prewarm=false
+containerFactory=kubernetes
+cold_loop=1
+warm_loop=0
+warm_warmup=0
+concurrent_client=0
+concurrent_loop=0
+concurrent_warmup=0
+record_num=0
