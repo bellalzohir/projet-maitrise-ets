@@ -9,7 +9,6 @@ variable "use_new_scheduler" {
   type        = bool
   default     = false
 }
-#terraform apply -var="use_new_scheduler=true"
 
 resource "helm_release" "owdev" {
   name       = "owdev"
