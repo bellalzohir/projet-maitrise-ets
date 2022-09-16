@@ -8,7 +8,7 @@ Projet de maîtrise à l'ÉTS de Montréal. Le projet vise à implanter et teste
 
 - [`Openwhisk`](./OpenWhisk/) contient les fonctions déployées sur la plateforme Openwhisk pour effectuer les tests et les scripts pour exécuter ces tests
 - [`faas-profiler`](./faas-profiler/) est un outil permettant de créer des charges de travail pour Openwhisk et d'analyser les performances suite à l'exécution des fonctions. Il a été adapté à partir de [faas-profiler](https://github.com/PrincetonUniversity/faas-profiler) pour fonctionner avec un déploiement d'Openwhisk sur Kubernetes.
-- [`terraform`](./terraform/) contient les fichiers Terraform permettant le déploiement de Jenkins, Openwhisk et les outils de monitoring sur la plateforme Kubernetes ([kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack)).
+- [`terraform`](./terraform/) contient les fichiers Terraform permettant le déploiement de Jenkins (non utilisé pour le projet), Openwhisk et les outils de monitoring sur la plateforme Kubernetes.
 
 **TODO** Un README présentant plus d'informations dans [`Openwhisk`](./OpenWhisk/) et [`faas-profiler`](./faas-profiler/).
 
@@ -55,7 +55,7 @@ Pour redéployer après avoir mis à jour les valeurs de la helm chart, il suffi
 
 #### Function Pull Scheduling
 
-Un configuration existe aussi pour installer Openwhisk avec le [nouveau scheduler](https://github.com/apache/openwhisk/blob/a1639f0e4d7270c9a230190ac26acb61413b6bbb/proposals/POEM-2-function-pulling-container-scheduler.md). Elle utilise une copie de la Helm Chart en cours de développement dans cette [pull request](https://github.com/apache/openwhisk-deploy-kube/pull/729) au commit [3c8a72e](https://github.com/hunhoffe/openwhisk-deploy-kube/commit/3c8a72e73f724ae941bc33a8ad72797b21725088). Pour déployer Openwhisk avec cette Helm chart contenant le nouveau scheduler il faut utiliser la commande suivante : 
+Un configuration existe aussi pour installer Openwhisk avec le [nouveau scheduler](https://github.com/apache/openwhisk/blob/a1639f0e4d7270c9a230190ac26acb61413b6bbb/proposals/POEM-2-function-pulling-container-scheduler.md). Elle utilise une copie de la Helm Chart en cours de développement dans cette [pull request](https://github.com/apache/openwhisk-deploy-kube/pull/729) au commit [3c8a72e](https://github.com/hunhoffe/openwhisk-deploy-kube/commit/3c8a72e73f724ae941bc33a8ad72797b21725088). Pour déployer Openwhisk avec cette Helm chart contenant le nouveau scheduler il faut utiliser la commande suivante :
 
 ```shell
 terraform apply -var="use_new_scheduler=true"
@@ -65,4 +65,31 @@ Pour l'instant le nouveau scheduler ne semble pas fonctionner sur Kubernetes, ma
 
 ### Installation de la suite de monitoring
 
-**TODO**
+Comme pour Openwhisk, il faut commencer par se placer dans le dosser [`terraform/Monitoring`](./terraform/Monitoring/). Si c'est le tout premier déploiement, il faut commencer par exécuter la commande suivante :
+
+```shell
+terraform init
+```
+
+Ce ne sera pas nécessaire dans le cas d'un redéploiement pour mettre à jour la configuration par exemple.
+
+Ce déploiement se base sur la Helm chart mise à disposition par la [communauté prometheus](https://github.com/prometheus-community). Elle se trouve ici : [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack). Cela permet de déployer une suite de monitoring très complète pour Kubernetes.
+
+Pour modifier la configuration du déploiement il suffit de mettre à jour le fichier de valeurs : [`monitoring-values.yaml`](./terraform/Monitoring/monitoring-values.yaml)
+
+Une fois les configurations souhaitées effectuées, pour installer la suite de monitoring il suffit d'exécuter la commande suivante :
+
+```shell
+terraform apply
+```
+
+#### Mesure de la consommation d'énergie
+
+Il est possible d'installer un service Telegraf qui peut récupérer la consommation d'énergie du noeud grâce à Intel powerstat, mais ça ne fonctionne pas sur une machine virtuelle. Le service n'a donc pas été testé complètement.
+Un fois Telegraf déployé, Prometheus communiquera avec Telegraf pour récupérer les mesures.
+
+Pour déployer la suite de monitoring avec Telegraf il faut exécuter la commande suivante :
+
+```shell
+terraform apply -var="enable_telegraf=true"
+```
