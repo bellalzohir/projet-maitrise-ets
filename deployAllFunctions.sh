@@ -122,25 +122,25 @@ if wsk -i action list -i | grep "arraySumNested";
 then echo -e ">> ${GREEN}arraySumNested successfully created${NOCOLOR}"; 
 else echo -e ">> ${RED}arraySumNested not created${NOCOLOR}"; TEST_STATUS="FAIL";  
 fi
-if wsk -i action list -i | grep "extractImageMetadata";
-then echo -e ">> ${GREEN}extractImageMetadata successfully created${NOCOLOR}"; 
-else echo -e ">> ${RED}extractImageMetadata not created${NOCOLOR}"; TEST_STATUS="FAIL";  
+if wsk -i action list -i | grep "extractImageMetadataimageseq";
+then echo -e ">> ${GREEN}extractImageMetadataimageseq successfully created${NOCOLOR}"; 
+else echo -e ">> ${RED}extractImageMetadataimageseq not created${NOCOLOR}"; TEST_STATUS="FAIL";  
 fi
-if wsk -i action list -i | grep "transformMetadata";
-then echo -e ">> ${GREEN}transformMetadata successfully created${NOCOLOR}"; 
-else echo -e ">> ${RED}transformMetadata not created${NOCOLOR}"; TEST_STATUS="FAIL";  
+if wsk -i action list -i | grep "transformMetadataimageseq";
+then echo -e ">> ${GREEN}transformMetadataimageseq successfully created${NOCOLOR}"; 
+else echo -e ">> ${RED}transformMetadataimageseq not created${NOCOLOR}"; TEST_STATUS="FAIL";  
 fi
-if wsk -i action list -i | grep "handler";
-then echo -e ">> ${GREEN}handler successfully created${NOCOLOR}"; 
-else echo -e ">> ${RED}handler not created${NOCOLOR}"; TEST_STATUS="FAIL";  
+if wsk -i action list -i | grep "handlerimageseq";
+then echo -e ">> ${GREEN}handlerimageseq successfully created${NOCOLOR}"; 
+else echo -e ">> ${RED}handlerimageseq not created${NOCOLOR}"; TEST_STATUS="FAIL";  
 fi
-if wsk -i action list -i | grep "thumbnail";
-then echo -e ">> ${GREEN}thumbnail successfully created${NOCOLOR}"; 
-else echo -e ">> ${RED}thumbnail not created${NOCOLOR}"; TEST_STATUS="FAIL";  
+if wsk -i action list -i | grep "thumbnailimageseq";
+then echo -e ">> ${GREEN}thumbnailimageseq successfully created${NOCOLOR}"; 
+else echo -e ">> ${RED}thumbnailimageseq not created${NOCOLOR}"; TEST_STATUS="FAIL";  
 fi
-if wsk -i action list -i | grep "storeImageMetadata";
-then echo -e ">> ${GREEN}storeImageMetadata successfully created${NOCOLOR}"; 
-else echo -e ">> ${RED}storeImageMetadata not created${NOCOLOR}"; TEST_STATUS="FAIL";  
+if wsk -i action list -i | grep "storeImageMetadataimageseq";
+then echo -e ">> ${GREEN}storeImageMetadataimageseq successfully created${NOCOLOR}"; 
+else echo -e ">> ${RED}storeImageMetadataimageseq not created${NOCOLOR}"; TEST_STATUS="FAIL";  
 fi
 if wsk -i action list -i | grep "imageProcessSequence";
 then echo -e ">> ${GREEN}imageProcessSequence successfully created${NOCOLOR}"; 

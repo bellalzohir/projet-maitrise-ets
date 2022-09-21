@@ -9,5 +9,5 @@
 # PURPOSE.
 # See the Mulan PSL v1 for more details.
 #
-wsk -i action update arraySumNested arraySum.js --kind nodejs:14 -a provide-api-key true --timeout 300000
+wsk -i action update arraySumNested arraySum.js -p n 20 --kind nodejs:14 -a provide-api-key true --timeout 300000
 

@@ -127,7 +127,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "avg(sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{namespace=\"openwhisk\", pod=~\"wskowdev.+\", cluster=\"$cluster\"}) by (pod))",
+          "expr": "avg(sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{namespace=\"openwhisk\", pod=~\"$actionContainer\", cluster=\"$cluster\"}) by (pod))",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "CPU avg",
@@ -269,7 +269,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "avg(sum(container_memory_working_set_bytes{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\", namespace=\"openwhisk\", pod=~\"wskowdev.+\", container!=\"\", image!=\"\"}) by (pod))",
+          "expr": "avg(sum(container_memory_working_set_bytes{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\", namespace=\"openwhisk\", pod=~\"$actionContainer\", container!=\"\", image!=\"\"}) by (pod))",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "mem avg",
@@ -366,6 +366,42 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "all",
+          "value": "wskowdev.+"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "action",
+        "multi": false,
+        "name": "actionContainer",
+        "options": [
+          {
+            "selected": true,
+            "text": "all",
+            "value": "wskowdev.+"
+          },
+          {
+            "selected": false,
+            "text": "arraySum_chained",
+            "value": "wskowdev.+arraysum-chained"
+          },
+          {
+            "selected": false,
+            "text": "arraySumNested",
+            "value": "wskowdev.+arraysumnested"
+          },
+          {
+            "selected": false,
+            "text": "imageProcessSequence",
+            "value": "wskowdev.+imageseq"
+          }
+        ],
+        "skipUrlSync": false,
+        "type": "custom"
       }
     ]
   },

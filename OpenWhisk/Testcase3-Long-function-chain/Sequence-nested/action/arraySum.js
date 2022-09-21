@@ -18,7 +18,7 @@ function main(params) {
     var retTimes = new Array();
     var fibo = fibonacciRecursiveMemo(1000);
     
-    if (params.n == 1) {
+    if (params.n <= 1) {
         startTimes.push(startTime)
         retTimes.push(Date.now())
         return { result: 1,

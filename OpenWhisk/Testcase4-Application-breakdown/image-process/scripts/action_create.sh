@@ -16,12 +16,12 @@ fi
 
 SCRIPTS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 pushd $SRC_DIR > /dev/null 2>&1
-wsk action update extractImageMetadata extract-image-metadata/target/extract-image-metadata.jar --main org.serverlessbench.ExtractImageMetadata --kind java:8-imagemagick -i
-wsk action update transformMetadata transform-metadata/target/transform-metadata.jar --main org.serverlessbench.TransformMetadata --kind java:8 -i
-wsk action update handler handler/target/handler.jar --main org.serverlessbench.Handler --kind java:8 -i
-wsk action update thumbnail thumbnail/target/thumbnail.jar --main org.serverlessbench.Thumbnail -kind java:8-imagemagick -i
-wsk action update storeImageMetadata  store-image-metadata/target/store-image-metadata.jar --main org.serverlessbench.StoreImageMetadata --kind java:8 -i
+wsk action update extractImageMetadataimageseq extract-image-metadata/target/extract-image-metadata.jar --main org.serverlessbench.ExtractImageMetadata --kind java:8-imagemagick -i
+wsk action update transformMetadataimageseq transform-metadata/target/transform-metadata.jar --main org.serverlessbench.TransformMetadata --kind java:8 -i
+wsk action update handlerimageSeq handler/target/handler.jar --main org.serverlessbench.Handler --kind java:8 -i
+wsk action update thumbnailimageseq thumbnail/target/thumbnail.jar --main org.serverlessbench.Thumbnail -kind java:8-imagemagick -i
+wsk action update storeImageMetadataimageseq  store-image-metadata/target/store-image-metadata.jar --main org.serverlessbench.StoreImageMetadata --kind java:8 -i
 popd >/dev/null 2>&1
 
-wsk action update imageProcessSequence --sequence extractImageMetadata,transformMetadata,handler,thumbnail,storeImageMetadata -i
+wsk action update imageProcessSequence --sequence extractImageMetadataimageseq,transformMetadataimageseq,handlerimageSeq,thumbnailimageseq,storeImageMetadataimageseq -i
 
